@@ -47,7 +47,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "value": "PublicSubnet1"
+                        "Value": "Website-Public-Subnet1"
                     }
                 ]
             }
@@ -63,7 +63,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "value": "PublicSubnet2"
+                        "Value": "Website-Public-Subnet2"
                     }
                 ]
             }
@@ -131,27 +131,24 @@
         "WebserverSG": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "VpcId": {
-                    "Ref": "EngineeringVpc"
+              "VpcId": {
+                  "Ref": "EngineeringVpc"
+              },
+              "GroupDescription": "Security group rules for webserver host.",
+              "SecurityGroupIngress": [
+                {
+                  "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "CidrIp": "0.0.0.0/0"
                 },
-                "Groupname": "WebserverSG",
-                "GroupDescription": "Security group rules for webserver host.",
-                "SecurityGroupIngress": [
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "YourIP"
-                        }
+                  "IpProtocol": "tcp",
+                  "FromPort": "22",
+                  "ToPort": "22",
+                  "CidrIp": {"Ref": "YourIP"}		  
                     }
-                ]
+              ]
             }
         },
         "Web1": {
