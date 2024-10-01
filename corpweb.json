@@ -17,7 +17,7 @@
             "ConstraintDescription": "Must be the name of an existing KeyPair"
         },
         "YourIP": {
-            "Description": "2601:444:200:6e30:f1d4:9017:9835:3776/32",
+            "Description": "The current IP address of your workstation (x.x.x.x/32)",
             "Type": "String"
         }
     },
@@ -44,10 +44,20 @@
                 },
                 "MapPublicIpOnLaunch": "true",
                 "CidrBlock": "10.0.0.0/24",
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        "0",
+                        {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Website-Public-Subnet1"
+                        "Value": "Public-Subnet1"
                     }
                 ]
             }
@@ -60,10 +70,20 @@
                 },
                 "MapPublicIpOnLaunch": "true",
                 "CidrBlock": "10.0.1.0/24",
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        "1",
+                        {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Website-Public-Subnet2"
+                        "Value": "Public-Subnet2"
                     }
                 ]
             }
@@ -131,24 +151,27 @@
         "WebserverSG": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-              "VpcId": {
-                  "Ref": "EngineeringVpc"
-              },
-              "GroupDescription": "Security group rules for webserver host.",
-              "SecurityGroupIngress": [
-                {
-                  "IpProtocol": "tcp",
-                  "FromPort": "80",
-                  "ToPort": "80",
-                  "CidrIp": "0.0.0.0/0"
+                "GroupName": "WebserverSG",
+                "GroupDescription": "Security group rules for webserver host.",
+                "VpcId": {
+                    "Ref": "EngineeringVpc"
                 },
+                "SecurityGroupIngress": [
                     {
-                  "IpProtocol": "tcp",
-                  "FromPort": "22",
-                  "ToPort": "22",
-                  "CidrIp": {"Ref": "YourIP"}		  
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "YourIP"
+                        }
                     }
-              ]
+                ]
             }
         },
         "Web1": {
@@ -227,7 +250,7 @@
                 ]
             }
         },
-        "EnineeringWebservers": {
+        "EnineeringWebserver": {
             "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
             "Properties": {
                 "Protocol": "HTTP",
@@ -245,12 +268,12 @@
                     {
                         "Type": "forward",
                         "TargetGroupArn": {
-                            "Ref": "EnineeringWebservers"
+                            "Ref": "EnineeringWebserver"
                         }
                     }
                 ],
                 "LoadBalancerArn": {
-                    "Ref": "EnineeringWebservers"
+                    "Ref": "EnineeringLB"
                 },
                 "Protocol": "HTTP",
                 "Port": 80
